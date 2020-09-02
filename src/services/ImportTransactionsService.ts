@@ -5,6 +5,7 @@ import AppError from '../errors/AppError';
 import CreateTransactionService from './CreateTransactionService';
 
 import uploadConfigs from '../config/upload';
+import readCsv from '../config/cvsFile';
 
 class ImportTransactionsService {
   async execute(filename: string): Promise<Transaction[]> {
@@ -16,7 +17,7 @@ class ImportTransactionsService {
     }
     const createTransactionService = new CreateTransactionService();
 
-    const data = await readCSV(filePath);
+    const data = await readCsv(filePath);
     const transactions: Transaction[] = [];
     for (let i = 0; i < data.length; i++) {
       const { category, title, type, value } = data[i];
