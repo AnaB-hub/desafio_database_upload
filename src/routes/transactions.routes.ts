@@ -6,15 +6,29 @@ import TransactionsRepository from '../repositories/TransactionsRepository';
 import CreateTransactionService from '../services/CreateTransactionService';
 import DeleteTransactionService from '../services/DeleteTransactionService';
 import ImportTransactionsService from '../services/ImportTransactionsService';
-import { getCustomRepository } from 'typeorm';
+import { getCustomRepository, getRepository } from 'typeorm';
+import Category from '../models/Category';
 
 const transactionsRouter = Router();
 const upload = multer(uploadConfig);
 
 transactionsRouter.get('/', async (request, response) => {
   const transactionRepository = getCustomRepository(TransactionsRepository);
+  const balance = await transactionRepository.getBalance();
   const transactions = await transactionRepository.find();
-  const balance = transactionRepository.getBalance();
+
+  for (let i = 0; i < transactions.length; i++) {
+    let transaction = transactions[i];
+
+    const categoryRepository = getRepository(Category);
+    const category = await categoryRepository.findOne(transaction.category_id);
+
+    delete transaction.category_id;
+
+    if (category) {
+      transaction.category = category;
+    }
+  }
 
   return response.json({ transactions, balance });
 });
